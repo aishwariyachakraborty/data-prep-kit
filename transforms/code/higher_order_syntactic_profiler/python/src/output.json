@@ -1,0 +1,41 @@
+{
+    "title": "Profiler Report",
+    "heading": "Syntactic and Semantic Profile",
+    "description": "This report presents the detailed profiling report of the input dataset.",
+    "metrics": [
+        {
+            "id": 0,
+            "name": "Library",
+            "value_counts": {
+                "dotnet-mgcb-compute": 3,
+                "Akade.IndexedSet": 2,
+                "Akka.DistributedData": 1,
+                "QuantConnect.Algorithm.CSharp": 2
+            }
+        },
+        {
+            "id": 1,
+            "name": "Language",
+            "value_counts": {
+                "C": 5
+            }
+        },
+        {
+            "id": 2,
+            "name": "Concepts",
+            "value_counts": {
+                "Algorithms and Data Structures": 5
+            }
+        },
+        {
+            "id": 3,
+            "name": "CCR",
+            "value_counts": {
+                "2.0": 1,
+                "1.0": 1,
+                "8.0": 2,
+                "1.5": 1
+            }
+        }
+    ]
+}
