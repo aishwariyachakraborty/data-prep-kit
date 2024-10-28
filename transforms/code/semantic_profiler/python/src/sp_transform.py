@@ -61,7 +61,7 @@ class SemanticProfilerTransform(AbstractTableTransform):
         self.logger.debug(f"Transforming one table with {len(table)} rows")
         ikb = knowledge_base(self.ikb_file, self.null_libs_file)
         ikb.load_ikb_trie()
-        libraries = table.column('Library').to_pylist()
+        libraries = table.column('UAST_Package_List').to_pylist()
         language = table.column('Language').to_pylist()
         concepts = [concept_extractor(lib, lang, ikb) for lib, lang in zip(libraries, language)]
         new_col = pa.array(concepts)
