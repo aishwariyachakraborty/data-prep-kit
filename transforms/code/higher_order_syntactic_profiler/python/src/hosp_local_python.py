@@ -34,7 +34,7 @@ params = {
     "runtime_job_id": "job_id",
     "runtime_code_location": ParamsUtils.convert_to_ast(code_location),
     # hosp params
-    "hosp_metrics_list": ["CCR"]
+    "hosp_metrics_list": "CCR"
     
 }
 if __name__ == "__main__":
