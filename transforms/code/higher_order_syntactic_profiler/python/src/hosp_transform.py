@@ -10,10 +10,14 @@
 # limitations under the License.
 ################################################################################
 
+import time
 from argparse import ArgumentParser, Namespace
 from typing import Any
+import csv
 from pathlib import Path
+
 import pyarrow as pa
+import pyarrow.parquet as pq
 from data_processing.transform import AbstractTableTransform, TransformConfiguration
 from data_processing.utils import CLIArgumentProvider
 
@@ -58,7 +62,6 @@ def extract_ccr(uast):
             return None 
     return None
 
-
 def generate_report(table: pa.Table, metrics_list):
     """
     Generates the profiler report given the table name and the metrics list given as input by the user.
@@ -66,15 +69,18 @@ def generate_report(table: pa.Table, metrics_list):
     columns = base_constructs + metrics_list
     script_dir = Path(__file__).parent.resolve()
     template_file = str(script_dir / 'template.html')
-    output_file = str(script_dir / 'output.html')
+    output_html = str(script_dir / 'output.html')
+    output_json = str(script_dir / 'output.json')
     report = Report(template_file)
-    count = 0
-    for column in columns:
-        plot = Plot(table, column)
+    id = 0
+    for column_name in columns:
+        plot = Plot(table, column_name)
         plot_html = plot.generate_distribution_plot()
-        report.add_metric(count, column, plot_html)
-        count+=1
-    report.save(output_file)
+        value_counts = dict(Counter(plot.column_data))
+        report.add_metric(id, column_name, value_counts, plot_html)
+        id+=1
+    report.save(output_html)
+    report.save_as_json(output_json)
 
 
 
@@ -93,7 +99,7 @@ class HigherOrderSyntacticProfilerTransform(AbstractTableTransform):
         # Make sure that the param name corresponds to the name used in apply_input_params method
         # of HigherOrderSyntacticProfilerTransformConfiguration class
         super().__init__(config)
-        self.metrics_list = config.get("metrics", ["CCR"])
+        self.metrics_list = config.get("metrics_list", ["CCR"])
         
 
     def transform(self, table: pa.Table, file_name: str = None) -> tuple[list[pa.Table], dict[str, Any]]:

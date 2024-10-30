@@ -1,10 +1,13 @@
 import os
 import numpy as np
+from collections import Counter
 from jinja2 import Environment, FileSystemLoader
 import pyarrow as pa
 import plotly.graph_objects as go
 from plotly.io import to_html
 from pathlib import Path
+import json
+
 
 class Plot:
     '''
@@ -67,13 +70,14 @@ class Report:
         self.data['heading'] = 'Syntactic and Semantic Profile'
         self.data['description'] = 'This report presents the detailed profiling report of the input dataset.'
 
-    def add_metric(self, metric_id, name, graph_html=None):
+    def add_metric(self, metric_id, name, value_counts, graph_html=None):
         if 'metrics' not in self.data:
             self.data['metrics'] = []
         self.data['metrics'].append({
             'id': metric_id,
             'name': name,
-            'graph_html': graph_html
+            'graph_html': graph_html,
+            'value_counts': value_counts,
         })
 
     def render(self):
@@ -85,17 +89,30 @@ class Report:
             f.write(output)
         print(f"HTML file generated: {output_file}")
 
+    def save_as_json(self, output_file):
+        # Remove non-serializable data, like HTML, if necessary
+        serializable_data = self.data.copy()
+        for metric in serializable_data.get('metrics', []):
+            if 'graph_html' in metric:
+                del metric['graph_html']  # Remove or replace with raw data if necessary
+        # Save the report data as JSON
+        with open(output_file, 'w') as json_file:
+            json.dump(serializable_data, json_file, indent=4)
+        print(f"Report data saved as JSON: {output_file}")
 
 
 
-# # Usage example
-# if __name__ == "__main__":
-#     data = {
-#         'column1': [1, 2, 2, 3, 3, 3, 4, 4, 4, 4]
-#     }
-#     table = pa.table(data)
-#     plot = Plot(table, 'column1')
-#     plot_html = plot.generate_distribution_plot()
-#     report = Report('template.html')
-#     report.add_metric('metric1', 'Metric 1', 'Details about Metric 1.', plot_html)
-#     report.save('output.html')
+
+# Usage example
+if __name__ == "__main__":
+    data = {
+        'column1': ['hello', 'blah', 'hello', 'try']
+    }
+    table = pa.table(data)
+    plot = Plot(table, 'column1')
+    plot_html = plot.generate_distribution_plot()
+    value_counts = dict(Counter(plot.column_data))
+    report = Report('template.html')
+    report.add_metric('metric1', 'Metric 1', value_counts, plot_html)
+    report.save('output.html')
+    report.save_as_json('output.json')
